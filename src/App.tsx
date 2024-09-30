@@ -3,6 +3,21 @@ import './App.css'
 import { useEffect, useState } from 'react';
 import ServiceApi from './api/ServiceApi';
 import { OverpassType } from './data/Util';
+import MarkerClusterGroup from 'react-leaflet-cluster';
+import { Icon} from "leaflet";
+
+import restaurant_icon from "./assets/restaurant_icon.png"
+import placeholder from './assets/placeholder.png'
+
+const customIcon = new Icon({
+  iconUrl: placeholder,
+  iconSize: [38, 38] // size of the icon
+});
+
+const restaurantIcon = new Icon({
+  iconUrl: restaurant_icon,
+  iconSize: [38, 38] // size of the icon
+});
 
 function App() {
   const [userLocation, setUserLocation] = useState<{
@@ -50,9 +65,13 @@ function App() {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <Marker position={[userLocation.lat, userLocation.lon]}>
+      <Marker 
+        position={[userLocation.lat, userLocation.lon]}
+        icon={customIcon}
+      >
         <Popup>Your location</Popup>
       </Marker>
+      <MarkerClusterGroup>
       {
         data?.elements.map((ele, index) => {
           const lat = ele.lat!
@@ -62,6 +81,7 @@ function App() {
               <Marker
                 key={index}
                 position={[lat, lon]}
+                icon={restaurantIcon}
               >
                 <Popup>{ele?.tags?.name}</Popup>
               </Marker>
@@ -69,6 +89,7 @@ function App() {
           }
         })
       }
+      </MarkerClusterGroup>
     </MapContainer>
   )
 }
