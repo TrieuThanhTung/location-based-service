@@ -3,6 +3,24 @@ import './App.css'
 import { useEffect, useState } from 'react';
 import ServiceApi from './api/ServiceApi';
 import { OverpassType } from './data/Util';
+import MarkerClusterGroup from 'react-leaflet-cluster';
+
+import { Icon, divIcon, icon, point } from "leaflet";
+
+const customIcon = new Icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/447/447031.png",
+  // iconUrl: require("./assets/placeholder.png"),
+  iconSize: [38, 38] // size of the icon
+});
+
+// custom cluster icon
+// const createClusterCustomIcon = function (cluster) {
+//   return new divIcon({
+//     html: `<span class="cluster-icon">${cluster.getChildCount()}</span>`,
+//     className: "custom-marker-cluster",
+//     iconSize: point(33, 33, true)
+//   });
+// };
 
 function App() {
   const [userLocation, setUserLocation] = useState<{
@@ -50,9 +68,13 @@ function App() {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <Marker position={[userLocation.lat, userLocation.lon]}>
+      <Marker 
+        position={[userLocation.lat, userLocation.lon]}
+        icon={customIcon}
+      >
         <Popup>Your location</Popup>
       </Marker>
+      <MarkerClusterGroup>
       {
         data?.elements.map((ele, index) => {
           const lat = ele.lat!
@@ -69,6 +91,7 @@ function App() {
           }
         })
       }
+      </MarkerClusterGroup>
     </MapContainer>
   )
 }
