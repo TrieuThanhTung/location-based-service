@@ -4,23 +4,20 @@ import { useEffect, useState } from 'react';
 import ServiceApi from './api/ServiceApi';
 import { OverpassType } from './data/Util';
 import MarkerClusterGroup from 'react-leaflet-cluster';
+import { Icon} from "leaflet";
 
-import { Icon, divIcon, icon, point } from "leaflet";
+import restaurant_icon from "./assets/restaurant_icon.png"
+import placeholder from './assets/placeholder.png'
 
 const customIcon = new Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/447/447031.png",
-  // iconUrl: require("./assets/placeholder.png"),
+  iconUrl: placeholder,
   iconSize: [38, 38] // size of the icon
 });
 
-// custom cluster icon
-// const createClusterCustomIcon = function (cluster) {
-//   return new divIcon({
-//     html: `<span class="cluster-icon">${cluster.getChildCount()}</span>`,
-//     className: "custom-marker-cluster",
-//     iconSize: point(33, 33, true)
-//   });
-// };
+const restaurantIcon = new Icon({
+  iconUrl: restaurant_icon,
+  iconSize: [38, 38] // size of the icon
+});
 
 function App() {
   const [userLocation, setUserLocation] = useState<{
@@ -84,6 +81,7 @@ function App() {
               <Marker
                 key={index}
                 position={[lat, lon]}
+                icon={restaurantIcon}
               >
                 <Popup>{ele?.tags?.name}</Popup>
               </Marker>
