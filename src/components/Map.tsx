@@ -1,17 +1,41 @@
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import { useEffect, useState } from 'react';
 import ServiceApi from '../api/ServiceApi';
-import { OverpassType } from '../data/Util';
+import { LocationType, OverpassType } from '../data/Util';
 import MarkerClusterGroup from 'react-leaflet-cluster';
+import L from "leaflet";
 
 import { icon } from '../data/Icon';
 
 type MapProps = {
   filter: string,
-  setFilter: React.Dispatch<React.SetStateAction<string>>
+  centerLocation: LocationType,
 }
 
-const Map: React.FC<MapProps> = ({ filter }) => {
+type ResetCenterViewType = {
+  centerLocation: LocationType,
+}
+
+const ResetCenterView: React.FC<ResetCenterViewType> = ({centerLocation}) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (centerLocation) {
+      map.setView(
+        L.latLng(centerLocation?.lat, centerLocation?.lon),
+        map.getZoom(),
+        {
+          animate: true
+        }
+      )
+    }
+  }, [centerLocation]);
+
+  return null;
+}
+
+const Map: React.FC<MapProps> = ({ filter, centerLocation }) => {
+
   const [userLocation, setUserLocation] = useState<{
     lat: number,
     lon: number
@@ -64,14 +88,20 @@ const Map: React.FC<MapProps> = ({ filter }) => {
   }, [])
 
   return (
-    <MapContainer center={[userLocation.lat, userLocation.lon]} zoom={13} scrollWheelZoom={true}>
+    <MapContainer center={[centerLocation?.lat, centerLocation?.lon]} zoom={13} scrollWheelZoom={true}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      {centerLocation.lat !== 21.0245 && <Marker
+        position={[centerLocation.lat, centerLocation.lon]}
+        icon={icon.searchLocationIcon}
+      >
+        <Popup>Point</Popup>
+      </Marker>}
       <Marker
         position={[userLocation.lat, userLocation.lon]}
-        icon={icon.customIcon}
+        icon={icon.userLocationIcon}
       >
         <Popup>Your location</Popup>
       </Marker>
@@ -117,6 +147,7 @@ const Map: React.FC<MapProps> = ({ filter }) => {
           })
         }
       </MarkerClusterGroup>
+      <ResetCenterView centerLocation={centerLocation}/>
     </MapContainer>
   )
 }
