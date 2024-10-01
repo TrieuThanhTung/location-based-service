@@ -1,24 +1,17 @@
-import { MapContainer, TileLayer, Marker, Popup} from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import { useEffect, useState } from 'react';
 import ServiceApi from '../api/ServiceApi';
 import { OverpassType } from '../data/Util';
 import MarkerClusterGroup from 'react-leaflet-cluster';
-import { Icon} from "leaflet";
 
-import restaurant_icon from "../assets/restaurant_icon.png"
-import placeholder from '../assets/placeholder.png'
+import { icon } from '../data/Icon';
 
-const customIcon = new Icon({
-  iconUrl: placeholder,
-  iconSize: [38, 38] // size of the icon
-});
+type MapProps = {
+  filter: string,
+  setFilter: React.Dispatch<React.SetStateAction<string>>
+}
 
-const restaurantIcon = new Icon({
-  iconUrl: restaurant_icon,
-  iconSize: [38, 38] // size of the icon
-});
-
-const Map = () => {
+const Map: React.FC<MapProps> = ({ filter }) => {
   const [userLocation, setUserLocation] = useState<{
     lat: number,
     lon: number
@@ -28,16 +21,28 @@ const Map = () => {
   })
 
   const [data, setData] = useState<OverpassType>()
-
   const fetch = async () => {
     try {
-      if(!userLocation.lat && !userLocation.lon) {
+      if (filter === '') {
+        setData(undefined)
         return;
       }
-      if(userLocation.lat == 21.0245) return
-      const res = await ServiceApi.getShop(userLocation.lat, userLocation.lon)
-      console.log(res.data)
-      setData(res.data)
+      if (!userLocation.lat && !userLocation.lon) {
+        return;
+      }
+      if (userLocation.lat === 21.0245) return
+      if (filter === 'cuisine') {
+        const res = await ServiceApi.getRestaurants(userLocation.lat, userLocation.lon)
+        setData(res.data)
+      }
+      if (filter === 'entertainment') {
+        const res = await ServiceApi.getLeisureService(userLocation.lat, userLocation.lon)
+        setData(res.data)
+      }
+      if (filter === 'shopping') {
+        const res = await ServiceApi.getShop(userLocation.lat, userLocation.lon)
+        setData(res.data)
+      }
     } catch (error) {
       console.log(error)
     }
@@ -45,10 +50,10 @@ const Map = () => {
 
   useEffect(() => {
     fetch()
-  }, [userLocation])
+  }, [userLocation, filter])
 
   useEffect(() => {
-    if(navigator.geolocation) {
+    if (navigator.geolocation) {
       navigator.geolocation.watchPosition((position) => {
         setUserLocation({
           lat: position.coords.latitude,
@@ -58,41 +63,59 @@ const Map = () => {
     }
   }, [])
 
-  // const position1 = [21.028511, 105.804817]; // Example: Hanoi
-  // const position2 = [10.823099, 106.629664]; // Example: Ho Chi Minh City  
-  // const polylinePositions = [position1, position2];
-  // <Polyline positions={polylinePositions} color='blue' />
-
   return (
     <MapContainer center={[userLocation.lat, userLocation.lon]} zoom={13} scrollWheelZoom={true}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <Marker 
+      <Marker
         position={[userLocation.lat, userLocation.lon]}
-        icon={customIcon}
+        icon={icon.customIcon}
       >
         <Popup>Your location</Popup>
       </Marker>
       <MarkerClusterGroup>
-      {
-        data?.elements.map((ele, index) => {
-          const lat = ele.lat!
-          const lon = ele.lon!
-          if(lat && lon) {
-            return (
-              <Marker
-                key={index}
-                position={[lat, lon]}
-                icon={restaurantIcon}
-              >
-                <Popup>{ele?.tags?.name}</Popup>
-              </Marker>
-            )
-          }
-        })
-      }
+        {
+          data?.elements.map((ele, index) => {
+            const lat = ele.lat!
+            const lon = ele.lon!
+            if (lat && lon) {
+              switch (filter) {
+                case "cuisine":
+                  return (
+                    <Marker
+                      key={index}
+                      position={[lat, lon]}
+                      icon={icon.restaurantIcon}
+                    >
+                      <Popup>{ele?.tags?.name}</Popup>
+                    </Marker>
+                  )
+                case "entertainment":
+                  return (
+                    <Marker
+                      key={index}
+                      position={[lat, lon]}
+                      icon={icon.entertainmentIcon}
+                    >
+                      <Popup>{ele?.tags?.name}</Popup>
+                    </Marker>
+                  )
+                case "shopping":
+                  return (
+                    <Marker
+                      key={index}
+                      position={[lat, lon]}
+                      icon={icon.shoppingIcon}
+                    >
+                      <Popup>{ele?.tags?.name}</Popup>
+                    </Marker>
+                  )
+              }
+            }
+          })
+        }
       </MarkerClusterGroup>
     </MapContainer>
   )
