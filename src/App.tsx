@@ -11,11 +11,20 @@ function App() {
     lon: 105.84117
   })
   const [dataSearch, setDataSearch] = useState<PlaceType[]>()
-   
+
   return (
     <>
-      <Map filter={filter} centerLocation={centerLocation}/>
-      <Filter filter={filter} setFilter={setFilter} dataSearch={dataSearch} setDataSearch={setDataSearch} setCenterLocation={setCenterLocation}/>
+      <Map
+        filter={filter}
+        centerLocation={centerLocation}
+      />
+      <Filter
+        filter={filter}
+        setFilter={setFilter}
+        dataSearch={dataSearch}
+        setDataSearch={setDataSearch}
+        setCenterLocation={setCenterLocation}
+      />
     </>
   )
 }

@@ -35,7 +35,7 @@ const Filter: React.FC<FilterProps> = ({ filter, setFilter, dataSearch, setDataS
 
   return (
     <div className="filter-container">
-      <SearchInput setDataSearch={setDataSearch} />
+      <SearchInput setDataSearch={setDataSearch} setCenterLocation={setCenterLocation}/>
       {!dataSearch && <div>
         <h4>Bộ lọc</h4>
         <label>

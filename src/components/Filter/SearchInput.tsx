@@ -5,17 +5,18 @@ import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import axios from 'axios';
-import { PlaceType } from '../../data/Util';
+import { LocationType, PlaceType } from '../../data/Util';
 
 type SearchInputProps = {
-  setDataSearch: React.Dispatch<React.SetStateAction<PlaceType[] | undefined>>
+  setDataSearch: React.Dispatch<React.SetStateAction<PlaceType[] | undefined>>,
+  setCenterLocation: React.Dispatch<React.SetStateAction<LocationType>>
 }
 
-export default function SearchInput({setDataSearch}: SearchInputProps) {
+export default function SearchInput({ setDataSearch, setCenterLocation }: SearchInputProps) {
   const [searchInput, setSearchInput] = React.useState('')
 
   const fectchData = async (query: string) => {
-    if(searchInput === '') return;
+    if (searchInput === '') return;
     try {
       const res = await axios.get(`https://nominatim.openstreetmap.org/search?q=${query}&format=json`)
       setDataSearch(res.data)
@@ -26,13 +27,25 @@ export default function SearchInput({setDataSearch}: SearchInputProps) {
   }
 
   const handleSubmitSearch = async () => {
-    console.log(searchInput)
+    if (searchInput === '') {
+      setDataSearch(undefined)
+      setCenterLocation({
+        lat: 21.0245,
+        lon: 105.84117
+      })
+      return;
+    }
     await fectchData(searchInput)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (e.key === 'Enter') {
+      handleSubmitSearch()
+    }
   }
 
   return (
     <Paper
-      component="form"
       sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 400 }}
     >
       <InputBase
@@ -40,6 +53,7 @@ export default function SearchInput({setDataSearch}: SearchInputProps) {
         placeholder="Tìm kiếm"
         inputProps={{ 'aria-label': 'search google maps' }}
         onChange={e => setSearchInput(e.target.value)}
+        onKeyDown={handleKeyDown}
       />
       <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={handleSubmitSearch}>
         <SearchIcon />
